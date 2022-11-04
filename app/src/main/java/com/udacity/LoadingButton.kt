@@ -113,10 +113,6 @@ class LoadingButton @JvmOverloads constructor(
     }
 
     private fun drawBackground(canvas: Canvas) {
-//        canvas.drawRoundRect(
-//            0f, 0f, widthSize, heightSize,
-//            widthSize / 4, widthSize / 4, buttonPaint
-//        )
         canvas.drawColor(buttonBackgroundColor)
         canvas.drawRect(0f, 0f, progressWidth, heightSize, buttonPaint)
     }

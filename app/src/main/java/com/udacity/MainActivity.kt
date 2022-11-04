@@ -16,30 +16,33 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import com.udacity.databinding.ActivityMainBinding
-import kotlinx.android.synthetic.main.activity_main.*
 
 enum class DownloadStatus(val value: Int) {
     SUCCESS(1), FAIL(0)
 }
-
-private const val NOTIFICATION_ID = 0
 
 const val DOWNLOAD_STATUS_KEY = "status"
 const val FILE_NAME_KEY = "file_name"
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
+    companion object {
+        private const val CHANNEL_ID = "download_channel_id"
+        private const val CHANNEL_NAME = "download_channel_name"
+        private const val NOTIFICATION_ID = 0
+    }
 
+    private lateinit var binding: ActivityMainBinding
     private var downloadID: Long = 0
     private lateinit var downloadManager: DownloadManager
-    private lateinit var downloadStatus: DownloadStatus
 
+    private lateinit var downloadStatus: DownloadStatus
     private lateinit var notificationManager: NotificationManager
     private lateinit var pendingIntent: PendingIntent
-    private lateinit var action: NotificationCompat.Action
 
+    private lateinit var action: NotificationCompat.Action
     private var url: String = ""
+
     private var fileName: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,7 +84,7 @@ class MainActivity : AppCompatActivity() {
             binding.content.customButton.buttonState = ButtonState.Loading
         }
         notificationManager = getSystemService(NotificationManager::class.java)
-        createChannel(getString(R.string.channel_id), getString(R.string.channel_name))
+        createChannel()
     }
 
     private val receiver = object : BroadcastReceiver() {
@@ -127,16 +130,12 @@ class MainActivity : AppCompatActivity() {
             downloadManager.enqueue(request)// enqueue puts the download request in the queue.
     }
 
-    companion object {
-        private const val CHANNEL_ID = "channelId"
-    }
-
-    private fun createChannel(channelId: String, channelName: String) {
+    private fun createChannel() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
-                channelId,
-                channelName,
+                CHANNEL_ID,
+                CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_HIGH
             )
             notificationChannel.description = "Download finished"
@@ -147,7 +146,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun NotificationManager.sendNotification(body: String) {
+    private fun NotificationManager.sendNotification(body: String) {
 
         val detailIntent = Intent(applicationContext, DetailActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -165,9 +164,7 @@ class MainActivity : AppCompatActivity() {
             pendingIntent
         ).build()
 
-        val builder = NotificationCompat.Builder(
-            applicationContext, applicationContext.getString(R.string.channel_id)
-        )
+        val builder = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setContentTitle(applicationContext.getString(R.string.notification_title))
             .setContentText(body)
             .setSmallIcon(R.drawable.ic_assistant_black_24dp)
